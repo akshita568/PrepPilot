@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: study_planner_db
+    restart: always
+    environment:
+      POSTGRES_USER: planner_user
+      POSTGRES_PASSWORD: planner_secure_password
+      POSTGRES_DB: study_planner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: study_planner_backend
+    restart: always
+    volumes:
+      - ./backend:/workspace
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://planner_user:planner_secure_password@db:5432/study_planner
+      - ENV=development
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: study_planner_frontend
+    restart: always
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_HOST=0.0.0.0
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
