@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from app.core.database import Base
 
 class StudyTask(Base):
@@ -8,22 +7,12 @@ class StudyTask(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
-    description = Column(Text, nullable=True)
-    
-    # AI Assistance data (e.g., automated sub-task breakdowns)
-    ai_breakdown = Column(Text, nullable=True) 
-    
-    # Status tracking
+    description = Column(String, nullable=True)
     is_completed = Column(Boolean, default=False)
-    due_date = Column(DateTime, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Foreign Key establishing ownership by a specific user
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    due_date = Column(Date, nullable=False)
     
-    # Relationship linkage back to the User object
+    # Links each task to a specific user account record
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    
+    # Relationship back to the User model
     owner = relationship("User", back_populates="tasks")
-
-# Now let's update your User model to support this relationship bidirectionally.
-# Open `backend/app/models/user.py` and add this line inside the User class:
-# tasks = relationship("StudyTask", back_populates="owner", cascade="all, delete-orphan")

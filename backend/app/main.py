@@ -3,8 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.config import settings
-from app.core.database import get_db
-from app.api.v1.endpoints import auth
+from app.core.database import get_db, Base, engine 
+
+# Correct explicit routing imports matching your folder structures
+from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.study import router as study_router
+
+# Create database tables automatically if they do not exist
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -16,7 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+# Connect the properly named imported routers
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(study_router, prefix="/api/v1/tasks", tags=["Study Tasks"])
 
 @app.get("/")
 def read_root():

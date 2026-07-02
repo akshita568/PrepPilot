@@ -1,11 +1,12 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15-alpine
     container_name: study_planner_db
-    restart: always
     environment:
-      POSTGRES_USER: planner_user
-      POSTGRES_PASSWORD: planner_secure_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: study_planner
     ports:
       - "5432:5432"
@@ -13,36 +14,29 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     container_name: study_planner_backend
     restart: always
-    volumes:
-      - ./backend:/workspace
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/workspace
     environment:
-      - DATABASE_URL=postgresql://planner_user:planner_secure_password@db:5432/study_planner
-      - ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/study_planner
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - db
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     container_name: study_planner_frontend
-    restart: always
+    ports:
+      - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_HOST=0.0.0.0
-    depends_on:
-      - backend
+    stdin_open: true
+    tty: true
 
 volumes:
   postgres_data:

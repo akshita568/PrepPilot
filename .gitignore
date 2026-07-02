@@ -1,0 +1,16 @@
+# Secrets and Credentials
+.env
+
+# Node dependencies
+node_modules/
+dist/
+
+# Python environment caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+v充/
+
+# OS systems
+.DS_Store
